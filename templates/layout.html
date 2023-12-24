@@ -1,0 +1,57 @@
+<!-- templates/layout.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.PageTitle}}</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{.PageTitle}}</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Short Description</th>
+            <th>Image</th>
+            <th>Goal Amount</th>
+            <th>Current Amount</th>
+            <th>Slug</th>
+        </tr>
+        {{range .Campaigns}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.Name}}</td>
+                <td>{{.ShortDescription}}</td>
+                <td><img src="{{.ImageURL}}" alt="Campaign Image"></td>
+                <td>{{.GoalAmount}}</td>
+                <td>{{.CurrentAmount}}</td>
+                <td>{{.Slug}}</td>
+            </tr>
+        {{end}}
+    </table>
+</body>
+</html>
