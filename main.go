@@ -39,7 +39,7 @@ func main() {
 
 	baseApiUrl := os.Getenv("BASE_API_URL")
 	if baseApiUrl == "" {
-		baseApiUrl = "http://fundhub.api.local"
+		baseApiUrl = "http://fundhubdev.api.local"
 	}
 
 	port := os.Getenv("PORT")

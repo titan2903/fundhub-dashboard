@@ -5,6 +5,6 @@ COPY go.* ./
 RUN go mod download
 COPY .env .
 COPY . .
-RUN go build -o dashboard .
+RUN go build -o fundhub-dashboard .
 EXPOSE 8000
-CMD ["./dashboard"]
+CMD ["./fundhub-dashboard"]
