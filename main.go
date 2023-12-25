@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"os"
 
+	logger "log"
+
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 )
 
 type Campaign struct {
@@ -41,7 +45,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8000"
+		port = "8080"
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html"))
@@ -51,11 +55,19 @@ func main() {
 		apiURL := fmt.Sprintf("%s/%s", baseApiUrl, "api/v1/campaigns")
 		response, err := http.Get(apiURL)
 		if err != nil {
-			log.Println("Error making API request:", err)
+			log.Error("Error making API request:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		defer response.Body.Close()
+
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Error("Error reading API response body:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		log.Info("API Response Body:", string(body))
 
 		// Decode the JSON response into the CampaignPageData struct
 		var campaignData struct {
@@ -67,16 +79,16 @@ func main() {
 			Data []Campaign `json:"data"`
 		}
 
-		err = json.NewDecoder(response.Body).Decode(&campaignData)
+		err = json.NewDecoder(bytes.NewReader(body)).Decode(&campaignData)
 		if err != nil {
-			log.Println("Error decoding JSON:", err)
+			log.Printf("Error decoding JSON: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		// Check if the API response status is success
 		if campaignData.Meta.Status != "success" {
-			log.Println("API request failed:", campaignData.Meta.Message)
+			log.Error("API request failed:", campaignData.Meta.Message)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -90,10 +102,10 @@ func main() {
 		tmpl.Execute(w, data)
 	})
 
-	log.Printf("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiUrl)
+	logger.Println("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiUrl)
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
-		log.Fatal("Error starting the server:", err)
+		log.Error("Error starting the server:", err)
 	}
 }
