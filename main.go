@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"os"
 
-	logger "log"
-
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
@@ -67,7 +65,7 @@ func main() {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		log.Info("API Response Body:", string(body))
+		log.Infof("API Response Body: %s", string(body))
 
 		// Decode the JSON response into the CampaignPageData struct
 		var campaignData struct {
@@ -102,7 +100,7 @@ func main() {
 		tmpl.Execute(w, data)
 	})
 
-	logger.Println("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiUrl)
+	log.Infof("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiUrl)
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
