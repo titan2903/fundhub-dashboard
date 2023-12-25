@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -59,14 +57,6 @@ func main() {
 		}
 		defer response.Body.Close()
 
-		body, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			log.Error("Error reading API response body:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-		log.Infof("API Response Body: %s", string(body))
-
 		// Decode the JSON response into the CampaignPageData struct
 		var campaignData struct {
 			Meta struct {
@@ -77,9 +67,9 @@ func main() {
 			Data []Campaign `json:"data"`
 		}
 
-		err = json.NewDecoder(bytes.NewReader(body)).Decode(&campaignData)
+		err = json.NewDecoder(response.Body).Decode(&campaignData)
 		if err != nil {
-			log.Printf("Error decoding JSON: %v", err)
+			log.Error("Error decoding JSON:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
