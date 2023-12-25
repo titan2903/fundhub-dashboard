@@ -68,6 +68,8 @@ func main() {
 		}
 
 		log.Infof("response body: %+v", response.Body)
+		log.Infof("Response Status Code: %d", response.StatusCode)
+		log.Infof("Response Headers: %+v", response.Header)
 
 		err = json.NewDecoder(response.Body).Decode(&campaignData)
 		if err != nil {
