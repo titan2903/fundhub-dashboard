@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 	"net/http"
 	"os"
 
@@ -42,22 +41,20 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8000"
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/layout.html"))
 
 	http.HandleFunc(baseURL, func(w http.ResponseWriter, r *http.Request) {
 		// Make a GET request to the API endpoint
-		apiURL := fmt.Sprintf("%s%s", baseApiUrl, "/api/v1/campaigns")
+		apiURL := fmt.Sprintf("%s/%s", baseApiUrl, "api/v1/campaigns")
 		response, err := http.Get(apiURL)
 		if err != nil {
 			log.Error("Error making API request:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		log.Infof("response body: %v", response.Body)
-
 		defer response.Body.Close()
 
 		// Decode the JSON response into the CampaignPageData struct
@@ -70,42 +67,26 @@ func main() {
 			Data []Campaign `json:"data"`
 		}
 
-		// err = json.NewDecoder(response.Body).Decode(&campaignData)
-		// Read the entire response body
-		body, err := io.ReadAll(response.Body)
+		log.Infof("response body: %+v", response.Body)
+
+		err = json.NewDecoder(response.Body).Decode(&campaignData)
 		if err != nil {
-			log.Error("Error reading response body:", err)
+			log.Error("Error decoding JSON:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		log.Infof("response body: %s", body)
+		// Check if the API response status is success
+		if campaignData.Meta.Status != "success" {
+			log.Error("API request failed:", campaignData.Meta.Message)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
-		var data CampaignPageData
-		if string(body) != "{}" {
-			// Use json.Unmarshal to decode the JSON
-			err = json.Unmarshal(body, &campaignData)
-			if err != nil {
-				log.Error("Error decoding JSON:", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-			// Check if the API response status is success
-			if campaignData.Meta.Status != "success" {
-				log.Error("API request failed:", campaignData.Meta.Message)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-
-			data = CampaignPageData{
-				PageTitle: "List of Campaigns",
-				Campaigns: campaignData.Data,
-			}
-		} else {
-			data = CampaignPageData{
-				PageTitle: "List of Campaigns",
-				Campaigns: campaignData.Data,
-			}
+		// Create the CampaignPageData
+		data := CampaignPageData{
+			PageTitle: "List of Campaigns",
+			Campaigns: campaignData.Data,
 		}
 
 		tmpl.Execute(w, data)
