@@ -82,7 +82,7 @@ func main() {
 		log.Infof("response body: %s", body)
 
 		var data CampaignPageData
-		if len(body) == 0 {
+		if string(body) != "{}" {
 			// Use json.Unmarshal to decode the JSON
 			err = json.Unmarshal(body, &campaignData)
 			if err != nil {
