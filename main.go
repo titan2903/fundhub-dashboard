@@ -29,7 +29,6 @@ type CampaignPageData struct {
 
 func main() {
 	_ = godotenv.Load()
-
 	baseURL := os.Getenv("BASE_URL")
 	if baseURL == "" {
 		baseURL = "/"
