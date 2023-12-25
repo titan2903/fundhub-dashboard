@@ -87,7 +87,6 @@ func main() {
 			Campaigns: campaignData.Data,
 		}
 
-		// Execute the template with the data
 		tmpl.Execute(w, data)
 	})
 
