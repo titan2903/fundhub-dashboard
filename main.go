@@ -56,6 +56,8 @@ func main() {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+		log.Infof("response body: %v", response.Body)
+
 		defer response.Body.Close()
 
 		// Decode the JSON response into the CampaignPageData struct
@@ -78,24 +80,32 @@ func main() {
 		}
 
 		log.Infof("response body: %s", body)
-		// Use json.Unmarshal to decode the JSON
-		err = json.Unmarshal(body, &campaignData)
-		if err != nil {
-			log.Error("Error decoding JSON:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-		// Check if the API response status is success
-		if campaignData.Meta.Status != "success" {
-			log.Error("API request failed:", campaignData.Meta.Message)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
 
-		// Create the CampaignPageData
-		data := CampaignPageData{
-			PageTitle: "List of Campaigns",
-			Campaigns: campaignData.Data,
+		var data CampaignPageData
+		if len(body) == 0 {
+			// Use json.Unmarshal to decode the JSON
+			err = json.Unmarshal(body, &campaignData)
+			if err != nil {
+				log.Error("Error decoding JSON:", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			// Check if the API response status is success
+			if campaignData.Meta.Status != "success" {
+				log.Error("API request failed:", campaignData.Meta.Message)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			data = CampaignPageData{
+				PageTitle: "List of Campaigns",
+				Campaigns: campaignData.Data,
+			}
+		} else {
+			data = CampaignPageData{
+				PageTitle: "List of Campaigns",
+				Campaigns: campaignData.Data,
+			}
 		}
 
 		tmpl.Execute(w, data)
