@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 )
 
 type Campaign struct {
@@ -51,7 +51,7 @@ func main() {
 		apiURL := fmt.Sprintf("%s/%s", baseApiUrl, "api/v1/campaigns")
 		response, err := http.Get(apiURL)
 		if err != nil {
-			log.Println("Error making API request:", err)
+			log.Error("Error making API request:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -69,14 +69,14 @@ func main() {
 
 		err = json.NewDecoder(response.Body).Decode(&campaignData)
 		if err != nil {
-			log.Println("Error decoding JSON:", err)
+			log.Error("Error decoding JSON:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		// Check if the API response status is success
 		if campaignData.Meta.Status != "success" {
-			log.Println("API request failed:", campaignData.Meta.Message)
+			log.Error("API request failed:", campaignData.Meta.Message)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -90,10 +90,10 @@ func main() {
 		tmpl.Execute(w, data)
 	})
 
-	log.Printf("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiUrl)
+	log.Infof("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiUrl)
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
-		log.Fatal("Error starting the server:", err)
+		log.Error("Error starting the server:", err)
 	}
 }
