@@ -5,5 +5,5 @@ COPY go.* ./
 RUN go mod download
 COPY . .
 RUN go build -o fundhub-dashboard .
-EXPOSE 8000
+EXPOSE 8080
 CMD ["./fundhub-dashboard"]
