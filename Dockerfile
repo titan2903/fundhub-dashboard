@@ -4,6 +4,6 @@ WORKDIR /app
 COPY go.* ./
 RUN go mod download
 COPY . .
-RUN go build -o fundhub-dashboard .
+RUN go build -o fundhub-dashboard-dev .
 EXPOSE 8000
-CMD ["./fundhub-dashboard"]
+CMD ["./fundhub-dashboard-dev"]
