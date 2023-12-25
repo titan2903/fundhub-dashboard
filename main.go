@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"os"
 
@@ -48,7 +49,7 @@ func main() {
 
 	http.HandleFunc(baseURL, func(w http.ResponseWriter, r *http.Request) {
 		// Make a GET request to the API endpoint
-		apiURL := fmt.Sprintf("%s/%s", baseApiUrl, "api/v1/campaigns")
+		apiURL := fmt.Sprintf("%s%s", baseApiUrl, "/api/v1/campaigns")
 		response, err := http.Get(apiURL)
 		if err != nil {
 			log.Error("Error making API request:", err)
@@ -67,13 +68,23 @@ func main() {
 			Data []Campaign `json:"data"`
 		}
 
-		err = json.NewDecoder(response.Body).Decode(&campaignData)
+		// err = json.NewDecoder(response.Body).Decode(&campaignData)
+		// Read the entire response body
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			log.Error("Error reading response body:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		log.Infof("response body: %s", body)
+		// Use json.Unmarshal to decode the JSON
+		err = json.Unmarshal(body, &campaignData)
 		if err != nil {
 			log.Error("Error decoding JSON:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-
 		// Check if the API response status is success
 		if campaignData.Meta.Status != "success" {
 			log.Error("API request failed:", campaignData.Meta.Message)
