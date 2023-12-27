@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 	"net/http"
 	"os"
 
@@ -31,14 +29,15 @@ type CampaignPageData struct {
 
 func main() {
 	_ = godotenv.Load()
+
 	baseURL := os.Getenv("BASE_URL")
 	if baseURL == "" {
 		baseURL = "/"
 	}
 
-	baseApiUrl := os.Getenv("BASE_API_URL")
-	if baseApiUrl == "" {
-		baseApiUrl = "http://fundhub.api.local"
+	baseApiURL := os.Getenv("BASE_API_URL")
+	if baseApiURL == "" {
+		baseApiURL = "http://fundhub.api.local"
 	}
 
 	port := os.Getenv("PORT")
@@ -49,11 +48,16 @@ func main() {
 	tmpl := template.Must(template.ParseFiles("templates/layout.html"))
 
 	http.HandleFunc(baseURL, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		// Make a GET request to the API endpoint
-		apiURL := fmt.Sprintf("%s/%s", baseApiUrl, "api/v1/campaigns")
+		apiURL := fmt.Sprintf("%s/%s", baseApiURL, "api/v1/campaigns")
 		response, err := http.Get(apiURL)
 		if err != nil {
-			log.Error("Error making API request:", err)
+			log.Errorf("Error making API request: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -61,18 +65,6 @@ func main() {
 
 		log.Infof("Response Status Code: %d", response.StatusCode)
 		log.Infof("Response Headers: %+v", response.Header)
-
-		// Read and log the response body
-		responseBody, err := io.ReadAll(response.Body)
-		if err != nil {
-			log.Error("Error reading response body:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-		log.Infof("Response Body: %s", responseBody)
-
-		// Create a new reader for the response body
-		response.Body = io.NopCloser(bytes.NewBuffer(responseBody))
 
 		// Decode the JSON response into the CampaignPageData struct
 		var campaignData struct {
@@ -84,12 +76,14 @@ func main() {
 			Data []Campaign `json:"data"`
 		}
 
-		err = json.NewDecoder(response.Body).Decode(&campaignData)
-		if err != nil {
-			log.Error("Error decoding JSON:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
+		log.Infof("body response: %v", response.Body)
+
+		_ = json.NewDecoder(response.Body).Decode(&campaignData)
+		// if err != nil {
+		// 	log.Errorf("Error decoding JSON: %v", err)
+		// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// 	return
+		// }
 
 		// Create the CampaignPageData
 		data := CampaignPageData{
@@ -100,10 +94,10 @@ func main() {
 		tmpl.Execute(w, data)
 	})
 
-	log.Infof("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiUrl)
+	log.Infof("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiURL)
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
-		log.Error("Error starting the server:", err)
+		log.Errorf("Error starting the server: %v", err)
 	}
 }
