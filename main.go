@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
@@ -64,20 +62,6 @@ func main() {
 		log.Infof("Response Status Code: %d", response.StatusCode)
 		log.Infof("Response Headers: %+v", response.Header)
 
-		// Check the Content-Type
-		contentType := response.Header.Get("Content-Type")
-		if !strings.HasPrefix(contentType, "application/json") {
-			log.Errorf("Unexpected content type: %s", contentType)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-		// Check for an empty response body
-		if response.ContentLength == 0 {
-			log.Warn("Empty response body")
-			http.Error(w, "Empty response body", http.StatusInternalServerError)
-			return
-		}
-
 		// Read and log the response body
 		responseBody, err := io.ReadAll(response.Body)
 		if err != nil {
@@ -88,7 +72,7 @@ func main() {
 		log.Infof("Response Body: %s", responseBody)
 
 		// Create a new reader for the response body
-		response.Body = ioutil.NopCloser(bytes.NewBuffer(responseBody))
+		response.Body = io.NopCloser(bytes.NewBuffer(responseBody))
 
 		// Decode the JSON response into the CampaignPageData struct
 		var campaignData struct {
@@ -103,13 +87,6 @@ func main() {
 		err = json.NewDecoder(response.Body).Decode(&campaignData)
 		if err != nil {
 			log.Error("Error decoding JSON:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		// Check if the API response status is success
-		if campaignData.Meta.Status != "success" {
-			log.Error("API request failed:", campaignData.Meta.Message)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
