@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -35,9 +34,9 @@ func main() {
 		baseURL = "/"
 	}
 
-	baseApiURL := os.Getenv("BASE_API_URL")
-	if baseApiURL == "" {
-		baseApiURL = "http://fundhub.api.local"
+	apiURL := os.Getenv("API_URL")
+	if apiURL == "" {
+		apiURL = "http://fundhub.api.local/api/v1/campaigns"
 	}
 
 	port := os.Getenv("PORT")
@@ -54,7 +53,6 @@ func main() {
 		}
 
 		// Make a GET request to the API endpoint
-		apiURL := fmt.Sprintf("%s/%s", baseApiURL, "api/v1/campaigns")
 		response, err := http.Get(apiURL)
 		if err != nil {
 			log.Errorf("Error making API request: %v", err)
@@ -94,7 +92,7 @@ func main() {
 		tmpl.Execute(w, data)
 	})
 
-	log.Infof("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, baseApiURL)
+	log.Infof("Server started on :%s, base URL: %s, base API URL: %s", port, baseURL, apiURL)
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
