@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'sandbox'
+        label 'fire'
     }
 
     environment {
@@ -14,7 +14,7 @@ pipeline {
             agent {
                 docker {
                     image 'golang:1.21.4-alpine3.18'
-                    label 'sandbox'
+                    label 'fire'
                 }
             }
 
@@ -59,17 +59,17 @@ pipeline {
     post {
         aborted {
             echo "Post Aborted"
-            discordSend description: "Fundhub Dashboard Deployment", footer: "Fundhub Dashboard Staging Deployment Status: Aborted", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
+            discordSend description: "Fundhub Dashboard Deployment", footer: "Fundhub Dashboard Production Deployment Status: Aborted", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
         }
 
         success {
             echo "Post Success"
-            discordSend description: "Fundhub Dashboard Deployment", footer: "Fundhub Dashboard Staging Deployment Status: Success", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
+            discordSend description: "Fundhub Dashboard Deployment", footer: "Fundhub Dashboard Production Deployment Status: Success", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
         }
         
         failure {
             echo "Post Failure"
-            discordSend description: "Fundhub Dashboard Deployment", footer: "Fundhub Dashboard Staging Deployment Status: Failure", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
+            discordSend description: "Fundhub Dashboard Deployment", footer: "Fundhub Dashboard Production Deployment Status: Failure", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
         }
     }
 }
