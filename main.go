@@ -35,8 +35,14 @@ func main() {
 	}
 
 	baseApiUrl := os.Getenv("BASE_API_URL")
-	if baseApiUrl == "" {
-		baseApiUrl = "http://fundhubdev.api.local"
+	if os.Getenv("ENV") == "staging" {
+		if baseApiUrl == "" {
+			baseApiUrl = "http://fundhubdev.api.local"
+		}
+	} else {
+		if baseApiUrl == "" {
+			baseApiUrl = "http://fundhub.api.local"
+		}
 	}
 
 	port := os.Getenv("PORT")
