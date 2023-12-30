@@ -57,7 +57,7 @@ func main() {
 		apiURL := fmt.Sprintf("%s/%s", baseApiUrl, "api/v1/campaigns")
 		response, err := http.Get(apiURL)
 		if err != nil {
-			log.Error("Error making API request:", err)
+			log.Errorf("Error making API request: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -75,14 +75,14 @@ func main() {
 
 		err = json.NewDecoder(response.Body).Decode(&campaignData)
 		if err != nil {
-			log.Error("Error decoding JSON:", err)
+			log.Errorf("Error decoding JSON: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		// Check if the API response status is success
 		if campaignData.Meta.Status != "success" {
-			log.Error("API request failed:", campaignData.Meta.Message)
+			log.Errorf("API request failed: %v", campaignData.Meta.Message)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -100,6 +100,6 @@ func main() {
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
-		log.Error("Error starting the server:", err)
+		log.Errorf("Error starting the server: %v", err)
 	}
 }
