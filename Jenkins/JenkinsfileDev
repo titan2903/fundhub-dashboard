@@ -26,7 +26,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building Apps"
-                sh "docker build -t $DOCKER_USERNAME/fundhub-dashboard-dev:${BUILD_NUMBER} -f Dockerfile.dev ."
+                sh "docker build -t $DOCKER_USERNAME/fundhub-dashboard-dev:${BUILD_NUMBER} ."
             }
         }
 
@@ -45,6 +45,7 @@ pipeline {
             echo "Post Aborted"
             discordSend description: "Push Docker Image", footer: "Push image fundhub-dashboard-dev:${BUILD_NUMBER} to Registry. Status: Aborted", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
         }
+
         success {
             echo "Post Success"
             discordSend description: "Push Docker Image", footer: "Push image fundhub-dashboard-dev:${BUILD_NUMBER} to Registry. Status: Success", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
