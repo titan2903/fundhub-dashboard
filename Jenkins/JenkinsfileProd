@@ -30,7 +30,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Push to Registry') {
              steps {
                 echo "Pushing to DockerHub"
                 sh "docker login -u $DOCKER_USERNAME -p ${DOCKER_PASSWORD}"
