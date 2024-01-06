@@ -33,8 +33,6 @@ pipeline {
         stage('Waiting Approval') {
             steps {
                 script {
-                    def approval // Define the approval variable
-
                     withCredentials([string(credentialsId: 'WEBHOOK_URL_DISCORD', variable: 'WEBHOOK_URL_DISCORD')]) {
                         script {
                             discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
@@ -44,7 +42,7 @@ pipeline {
                         }
 
                         timeout(time: 30, unit: "MINUTES") {
-                            approval = input message: 'Do you want to approve the push to Registry?', ok: 'Yes'
+                            input message: 'Do you want to approve the push to Registry?', ok: 'Yes'
                         }
                     }
                 }
