@@ -36,9 +36,7 @@ pipeline {
                     def approval // Define the approval variable
                     def payloadMsg = '''
                     {
-                        "content": "Approval push to Registry",
-                        "description": "Please countinue fundhub-dashboard:${BUILD_NUMBER} push to Registry.",
-                        "build_url": "${env.BUILD_URL}"
+                        "content": "Please countinue fundhub-dashboard:${BUILD_NUMBER} push to Registry. Build URL: "${env.BUILD_URL}""
                     }
                     '''
                     try {
