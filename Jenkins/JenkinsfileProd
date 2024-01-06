@@ -31,11 +31,58 @@ pipeline {
         }
 
         stage('Push to Registry') {
-             steps {
-                echo "Pushing to DockerHub"
-                sh "docker login -u $DOCKER_USERNAME -p ${DOCKER_PASSWORD}"
-                sh "docker push $DOCKER_USERNAME/fundhub-dashboard:${BUILD_NUMBER}"
-                sh 'docker rmi $(docker images -q)'
+            steps {
+                script {
+                    def approval // Define the approval variable
+                    def payloadMsg = '''
+                    {
+                        "content": "Approval push to Registry",
+                        "description": "Please countinue fundhub-dashboard:${BUILD_NUMBER} push to Registry.",
+                        "build_url": "${env.BUILD_URL}"
+                    }
+                    '''
+                    try {
+                        sh """
+                            curl -X POST -H 'Content-Type: application/json' -d '$payloadMsg' "$WEBHOOK_URL_DISCORD"
+                        """
+                    } catch (Exception e) {
+                        echo "Error notifying Discord: ${e.message}"
+                    }
+                }
+
+                timeout(time: 30, unit: "MINUTES") {
+	                approval = input message: 'Do you want to approve the push to Registry?', ok: 'Yes'
+
+                    // Notify Discord about the push to Registry approval
+                    script {
+                        def approvalMessage = approval == 'Yes' ? 'approved' : 'rejected'
+                        def payload = '''
+                        {
+                            "content": "Push to Registry approval received from ${approvalMessage}:white_check_mark:",
+                            "username": "Jenkins",
+                            "build_url": "${env.BUILD_URL}"
+                        }
+                        '''
+                        try {
+                            sh """
+                                curl -X POST -H 'Content-Type: application/json' -d '$payload' "$WEBHOOK_URL_DISCORD"
+                            """
+                        } catch (Exception e) {
+                            echo "Error notifying Discord: ${e.message}"
+                        }
+                    }
+
+	            }
+
+                // Continue push to Registry if approved, abort if rejected
+                if (approval == 'Yes') {
+                    echo "Pushing to DockerHub"
+                    sh "docker login -u $DOCKER_USERNAME -p ${DOCKER_PASSWORD}"
+                    sh "docker push $DOCKER_USERNAME/fundhub-dashboard:${BUILD_NUMBER}"
+                    sh 'docker rmi $(docker images -q)'
+                } else {
+                    error "Deployment rejected. Aborting deployment."
+                }
             }
         }
     }
