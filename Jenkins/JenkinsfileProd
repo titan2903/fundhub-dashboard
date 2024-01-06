@@ -75,13 +75,15 @@ pipeline {
 	            }
 
                 // Continue push to Registry if approved, abort if rejected
-                if (approval == 'Yes') {
-                    echo "Pushing to DockerHub"
-                    sh "docker login -u $DOCKER_USERNAME -p ${DOCKER_PASSWORD}"
-                    sh "docker push $DOCKER_USERNAME/fundhub-dashboard:${BUILD_NUMBER}"
-                    sh 'docker rmi $(docker images -q)'
-                } else {
-                    error "Deployment rejected. Aborting deployment."
+                script {
+                    if (approval == 'Yes') {
+                        echo "Pushing to DockerHub"
+                        sh "docker login -u $DOCKER_USERNAME -p ${DOCKER_PASSWORD}"
+                        sh "docker push $DOCKER_USERNAME/fundhub-dashboard:${BUILD_NUMBER}"
+                        sh 'docker rmi $(docker images -q)'
+                    } else {
+                        error "Deployment rejected. Aborting deployment."
+                    }
                 }
             }
         }
