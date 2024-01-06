@@ -55,7 +55,6 @@ pipeline {
                                         title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
                                         result: currentBuild.currentResult.toLowerCase(),
                                         description: "Please continue fundhub-dashboard:${BUILD_NUMBER} push to Registry",
-                                        enableArtifactsList: true,
                                         showChangeset: true
                         }
 
@@ -69,7 +68,6 @@ pipeline {
                                             title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
                                             result: currentBuild.currentResult.toLowerCase(),
                                             description: "Push to Registry approval received from ${approvalMessage}",
-                                            enableArtifactsList: true,
                                             showChangeset: true
                                 // def payload = '''
                                 // {
@@ -109,16 +107,22 @@ pipeline {
         aborted {
             echo "Post Aborted"
             discordSend description: "Push Docker Image", footer: "Push image fundhub-dashboard:${BUILD_NUMBER} to Registry. Status: Aborted", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
+            showChangeset: true
+            enableArtifactsList: true
         }
 
         success {
             echo "Post Success"
             discordSend description: "Push Docker Image", footer: "Push image fundhub-dashboard:${BUILD_NUMBER} to Registry. Status: Success", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
+            showChangeset: true
+            enableArtifactsList: true
         }
 
         failure {
             echo "Post Failure"
             discordSend description: "Push Docker Image", footer: "Push image fundhub-dashboard:${BUILD_NUMBER} to Registry. Status: Failure", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "$WEBHOOK_URL_DISCORD"
+            showChangeset: true
+            enableArtifactsList: true
         }
     }
 }
