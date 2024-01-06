@@ -39,9 +39,9 @@ pipeline {
                         script {
                             discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
                                         title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
-                                        result: currentBuild.currentResult.toLowerCase(),
                                         description: "Please continue fundhub-dashboard:${BUILD_NUMBER} push to Registry",
-                                        showChangeset: true
+                                        showChangeset: true,
+                                        link: env.BUILD_URL
                         }
 
                         timeout(time: 30, unit: "MINUTES") {
@@ -52,9 +52,9 @@ pipeline {
                                 def approvalMessage = approval == 'Yes' ? 'Approved' : 'Rejected'
                                 discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
                                             title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
-                                            result: currentBuild.currentResult.toLowerCase(),
                                             description: "Push to Registry approval received from ${approvalMessage}:white_check_mark:",
-                                            showChangeset: true
+                                            showChangeset: true,
+                                            link: env.BUILD_URL
                                 // def payload = '''
                                 // {
                                 //     "content": "Push to Registry approval received from ${approvalMessage}:white_check_mark:",
