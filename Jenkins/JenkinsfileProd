@@ -38,8 +38,7 @@ pipeline {
                             discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
                                         title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
                                         description: "Please approve to continue fundhub-dashboard:${BUILD_NUMBER} push to Registry",
-                                        showChangeset: true,
-                                        link: env.BUILD_URL
+                                        showChangeset: true
                         }
 
                         timeout(time: 30, unit: "MINUTES") {
