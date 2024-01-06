@@ -36,13 +36,22 @@ pipeline {
                     def approval // Define the approval variable
 
                     withCredentials([string(credentialsId: 'WEBHOOK_URL_DISCORD', variable: 'WEBHOOK_URL_DISCORD')]) {
-                        def payload = '''
-                        {
-                            "content": "Approval push to Registry",
-                            "description": "Please continue fundhub-dashboard:${BUILD_NUMBER} push to Registry.",
-                            "build_url": "${env.BUILD_URL}"
+                        script {
+                            def payloadMsg = '''
+                            {
+                                "content": "Approval push to Registry",
+                                "description": "Please continue fundhub-dashboard:${BUILD_NUMBER} push to Registry.",
+                                "build_url": "${env.BUILD_URL}"
+                            }
+                            '''
+                            try {
+                                sh """
+                                    curl -X POST -H 'Content-Type: application/json' -d '$payloadMsg' "$WEBHOOK_URL_DISCORD"
+                                """
+                            } catch (Exception e) {
+                                echo "Error notifying Approval: ${e.message}"
+                            }
                         }
-                        '''
 
                         timeout(time: 30, unit: "MINUTES") {
                             approval = input message: 'Do you want to approve the push to Registry?', ok: 'Yes'
@@ -62,7 +71,7 @@ pipeline {
                                         curl -X POST -H 'Content-Type: application/json' -d '$payload' "$WEBHOOK_URL_DISCORD"
                                     """
                                 } catch (Exception e) {
-                                    echo "Error notifying Discord: ${e.message}"
+                                    echo "Error notifying Approved: ${e.message}"
                                 }
                             }
 
