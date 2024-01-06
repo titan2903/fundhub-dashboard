@@ -37,11 +37,11 @@ func main() {
 	baseApiUrl := os.Getenv("BASE_API_URL")
 	if os.Getenv("ENV") == "staging" {
 		if baseApiUrl == "" {
-			baseApiUrl = "http://fundhubdev.api.local"
+			baseApiUrl = "https://fundhubdevapi.titanio.xyz"
 		}
 	} else {
 		if baseApiUrl == "" {
-			baseApiUrl = "http://fundhub.api.local"
+			baseApiUrl = "https://fundhubapi.titanio.xyz"
 		}
 	}
 
