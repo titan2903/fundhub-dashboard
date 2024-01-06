@@ -46,6 +46,7 @@ pipeline {
                         timeout(time: 30, unit: "MINUTES") {
                             approval = input message: 'Do you want to approve the push to Registry?', ok: 'Yes'
                             
+                            echo "Approval value: ${approval}"
                             // Notify Discord about the push to Registry approval
                             if (approval == 'Yes') {
                                 discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
