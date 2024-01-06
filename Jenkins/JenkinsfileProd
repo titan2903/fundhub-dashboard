@@ -52,9 +52,8 @@ pipeline {
         stage('Push to Registry') {
             steps {
                 discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
-                            title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
+                            title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER} | ${env.BUILD_URL}",
                             description: "Push to Registry approval received from Approved :white_check_mark:",
-                            link: "${env.BUILD_URL}",
                             showChangeset: true
 
                 echo "Pushing to DockerHub"
