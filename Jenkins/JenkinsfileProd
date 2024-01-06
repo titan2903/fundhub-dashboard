@@ -46,7 +46,7 @@ pipeline {
                             '''
                             try {
                                 sh """
-                                    curl -X POST -H 'Content-Type: application/json' -d '$payloadMsg' "$WEBHOOK_URL_DISCORD"
+                                    curl -X POST -H 'Content-Type: application/json' -d '$payloadMsg' '$WEBHOOK_URL_DISCORD'
                                 """
                             } catch (Exception e) {
                                 echo "Error notifying Approval: ${e.message}"
@@ -68,7 +68,7 @@ pipeline {
                                 '''
                                 try {
                                     sh """
-                                        curl -X POST -H 'Content-Type: application/json' -d '$payload' "$WEBHOOK_URL_DISCORD"
+                                        curl -X POST -H 'Content-Type: application/json' -d '$payload' '$WEBHOOK_URL_DISCORD'
                                     """
                                 } catch (Exception e) {
                                     echo "Error notifying Approved: ${e.message}"
