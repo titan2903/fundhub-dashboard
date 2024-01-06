@@ -30,7 +30,7 @@ pipeline {
             }
         }
 
-         stage('Push to Registry') {
+        stage('Push to Registry') {
             steps {
                 script {
                     def approval // Define the approval variable
@@ -48,25 +48,27 @@ pipeline {
                             approval = input message: 'Do you want to approve the push to Registry?', ok: 'Yes'
 
                             // Notify Discord about the push to Registry approval
-                            script {
-                                def approvalMessage = approval == 'Yes' ? 'Approved' : 'Rejected'
-                                discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
-                                            title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
-                                            description: "Push to Registry approval received from ${approvalMessage}:white_check_mark:",
-                                            showChangeset: true,
-                                            link: env.BUILD_URL
-                            }
                         }
+                    }
 
-                        // Continue push to Registry if approved, abort if rejected
-                        script {
-                            if (approval == 'Yes') {
-                                echo "Pushing to DockerHub"
-                                sh "docker login -u $DOCKER_USERNAME -p ${DOCKER_PASSWORD}"
-                                sh "docker push $DOCKER_USERNAME/fundhub-dashboard:${BUILD_NUMBER}"
-                                sh 'docker rmi $(docker images -q)'
-                            }
-                        }
+                    // Continue push to Registry if approved, abort if rejected
+                    if (approval == 'Yes') {
+                        discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
+                                    title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
+                                    description: "Push to Registry approval received from Approved :white_check_mark:",
+                                    showChangeset: true,
+                                    link: env.BUILD_URL
+
+                        echo "Pushing to DockerHub"
+                        sh "docker login -u $DOCKER_USERNAME -p ${DOCKER_PASSWORD}"
+                        sh "docker push $DOCKER_USERNAME/fundhub-dashboard:${BUILD_NUMBER}"
+                        sh 'docker rmi $(docker images -q)'
+                    } else {
+                        discordSend webhookURL: "$WEBHOOK_URL_DISCORD",
+                                    title: "${env.JOB_BASE_NAME} #${env.BUILD_NUMBER}",
+                                    description: "Push to Registry approval received from Rejected :x:",
+                                    showChangeset: true,
+                                    link: env.BUILD_URL
                     }
                 }
             }
