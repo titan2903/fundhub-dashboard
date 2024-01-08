@@ -89,7 +89,7 @@ func main() {
 
 		// Create the CampaignPageData
 		data := CampaignPageData{
-			PageTitle: "List of Campaigns",
+			PageTitle: "List of Campaigns v2",
 			Campaigns: campaignData.Data,
 		}
 
